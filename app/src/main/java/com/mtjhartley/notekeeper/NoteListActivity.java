@@ -36,7 +36,8 @@ public class NoteListActivity extends AppCompatActivity {
     }
 
     private void initializeDisplayContent() {
-        ListView listNotes = findViewById(R.id.list_notes);
+        //marking this as final allows us to use it in the anonymous class
+        final ListView listNotes = findViewById(R.id.list_notes);
 
         List<NoteInfo> notes = DataManager.getInstance().getNotes();
         ArrayAdapter<NoteInfo> adapterNotes = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notes);
@@ -50,7 +51,13 @@ public class NoteListActivity extends AppCompatActivity {
                 //activity interaction starts here
                 //specify notelistactivity.this because we're inside an anonymous class
                 Intent intent = new Intent(NoteListActivity.this, NoteActivity.class);
+                //get a reference ot the note that corresponds to the user selection
+                NoteInfo note = (NoteInfo) listNotes.getItemAtPosition(position);
+                //name value pair, use the static final constant declared in the activity we're sending the intent too
+                intent.putExtra(NoteActivity.NOTE_INFO, note);
                 startActivity(intent);
+
+
             }
         });
     }

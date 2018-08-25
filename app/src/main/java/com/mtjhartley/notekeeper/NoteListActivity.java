@@ -3,7 +3,6 @@ package com.mtjhartley.notekeeper;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.lang.reflect.Array;
 import java.util.List;
 
 public class NoteListActivity extends AppCompatActivity {
@@ -52,9 +50,9 @@ public class NoteListActivity extends AppCompatActivity {
                 //specify notelistactivity.this because we're inside an anonymous class
                 Intent intent = new Intent(NoteListActivity.this, NoteActivity.class);
                 //get a reference ot the note that corresponds to the user selection
-                NoteInfo note = (NoteInfo) listNotes.getItemAtPosition(position);
+//                NoteInfo note = (NoteInfo) listNotes.getItemAtPosition(position);
                 //name value pair, use the static final constant declared in the activity we're sending the intent too
-                intent.putExtra(NoteActivity.NOTE_INFO, note);
+                intent.putExtra(NoteActivity.NOTE_POSITION, position);
                 startActivity(intent);
 
 

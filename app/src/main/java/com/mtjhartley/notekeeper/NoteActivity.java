@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -13,7 +14,7 @@ import android.widget.Spinner;
 import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
-
+    public final String TAG = getClass().getSimpleName();
     public static final String NOTE_POSITION = "com.mtjhartley.notekeeper.NOTE_POSITION";
     public static final String ORIGINAL_NOTE_COURSE_ID = "com.mtjhartley.notekeeper.ORIGINAL_NOTE_COURSE_ID";
     public static final String ORIGINAL_NOTE_TITLE = "com.mtjhartley.notekeeper.ORIGINAL_NOTE_TITLE";
@@ -64,6 +65,8 @@ public class NoteActivity extends AppCompatActivity {
         if(!mIsNewNote)
             displayNote(mSpinnerCourses, mTextNoteTitle, mTextNoteText);
 
+        Log.d(TAG, "onCreate");
+
     }
 
     private void restoreOriginalNoteValues(Bundle savedInstanceState) {
@@ -84,7 +87,7 @@ public class NoteActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if(mIsCancelling){
-
+            Log.i(TAG, "cancelling note at position: " + mNotePosition);
             //if it is a new note, get the mNotePosition (recently created is the value
             //and then call remove on it
             //IF it is a new note
@@ -96,6 +99,8 @@ public class NoteActivity extends AppCompatActivity {
         } else {
             saveNote();
         }
+
+        Log.d(TAG, "onPause");
     }
 
     @Override
@@ -132,19 +137,22 @@ public class NoteActivity extends AppCompatActivity {
 
     private void readDisplayStateValues() {
         Intent intent = getIntent();
-        int position = intent.getIntExtra(NoteActivity.NOTE_POSITION, POSITION_NOT_SET);
-        mIsNewNote = position == POSITION_NOT_SET;
+        mNotePosition = intent.getIntExtra(NoteActivity.NOTE_POSITION, POSITION_NOT_SET);
+        mIsNewNote = mNotePosition == POSITION_NOT_SET;
         if (mIsNewNote){
             createNewNote();
-        } else {
-            mNote = DataManager.getInstance().getNotes().get(position);
         }
+
+        Log.i(TAG, "mNotePosition: " + mNotePosition);
+
+        mNote = DataManager.getInstance().getNotes().get(mNotePosition);
+
     }
 
     private void createNewNote() {
         DataManager dm = DataManager.getInstance();
         mNotePosition = dm.createNewNote(); //click the lightbulb to see the return type of this method
-        mNote = dm.getNotes().get(mNotePosition); //grab the newly created note
+        //mNote = dm.getNotes().get(mNotePosition); //grab the newly created note
     }
 
     @Override

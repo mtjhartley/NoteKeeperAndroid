@@ -21,6 +21,8 @@ public class NoteActivity extends AppCompatActivity {
     private EditText mTextNoteTitle;
     private EditText mTextNoteText;
     private Spinner mSpinnerCourses;
+    private int mNotePosition;
+    private boolean mIsCancelling;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,27 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mIsCancelling){
+            //if it is a new note, get the mNotePosition (recently created is the value
+            //and then call remove on it
+            //IF it is a new note
+            if (mIsNewNote) {
+                DataManager.getInstance().removeNote(mNotePosition);
+            }
+        } else {
+            saveNote();
+        }
+    }
+
+    private void saveNote() {
+        mNote.setCourse((CourseInfo) mSpinnerCourses.getSelectedItem());
+        mNote.setTitle(mTextNoteTitle.getText().toString());
+        mNote.setText(mTextNoteText.getText().toString());
+    }
+
     private void displayNote(Spinner spinnerCourses, EditText textNoteTitle, EditText textNoteText) {
         //get the list of courses, get the index of the passed in course, and select it
         List<CourseInfo> courses = DataManager.getInstance().getCourses();
@@ -67,9 +90,17 @@ public class NoteActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int position = intent.getIntExtra(NoteActivity.NOTE_POSITION, POSITION_NOT_SET);
         mIsNewNote = position == POSITION_NOT_SET;
-        if (!mIsNewNote)
+        if (mIsNewNote){
+            createNewNote();
+        } else {
             mNote = DataManager.getInstance().getNotes().get(position);
+        }
+    }
 
+    private void createNewNote() {
+        DataManager dm = DataManager.getInstance();
+        mNotePosition = dm.createNewNote(); //click the lightbulb to see the return type of this method
+        mNote = dm.getNotes().get(mNotePosition); //grab the newly created note
     }
 
     @Override
@@ -90,6 +121,10 @@ public class NoteActivity extends AppCompatActivity {
         if (id == R.id.action_send_mail) {
             sendEmail();
             return true;
+        } else if (id == R.id.action_cancel) {
+            mIsCancelling = true;
+            //call finish, which calls onPause to exit the activity
+            finish();
         }
 
         return super.onOptionsItemSelected(item);

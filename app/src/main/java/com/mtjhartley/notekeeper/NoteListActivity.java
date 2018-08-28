@@ -48,29 +48,6 @@ public class NoteListActivity extends AppCompatActivity {
 
 
     private void initializeDisplayContent() {
-//        //marking this as final allows us to use it in the anonymous class
-//        final ListView listNotes = findViewById(R.id.list_notes);
-//
-//        List<NoteInfo> notes = DataManager.getInstance().getNotes();
-//        mAdapterNotes = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notes);
-//
-//        listNotes.setAdapter(mAdapterNotes);
-//
-//        //create anonymous class here
-//        listNotes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                //activity interaction starts here
-//                //specify notelistactivity.this because we're inside an anonymous class
-//                Intent intent = new Intent(NoteListActivity.this, NoteActivity.class);
-//                //get a reference ot the note that corresponds to the user selection
-////                NoteInfo note = (NoteInfo) listNotes.getItemAtPosition(position);
-//                //name value pair, use the static final constant declared in the activity we're sending the intent too
-//                intent.putExtra(NoteActivity.NOTE_POSITION, position);
-//                startActivity(intent);
-//            }
-//        });
-
         final RecyclerView recyclerNotes = findViewById(R.id.list_notes);
         final LinearLayoutManager notesLayoutManager = new LinearLayoutManager(this);
         recyclerNotes.setLayoutManager(notesLayoutManager);

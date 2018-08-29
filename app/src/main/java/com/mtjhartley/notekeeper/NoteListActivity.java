@@ -41,6 +41,7 @@ public class NoteListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        //good for smaller amounts of data
         mNoteRecyclerAdapter.notifyDataSetChanged();
 //        mAdapterNotes.notifyDataSetChanged(); //build in method to the arrayadapter
     }

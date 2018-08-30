@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -24,6 +25,8 @@ public class MainActivity extends AppCompatActivity
     private NoteRecyclerAdapter mNoteRecyclerAdapter;
     private RecyclerView mRecyclerItems;
     private LinearLayoutManager mNotesLayoutManager;
+    private CourseRecyclerAdapter mCourseRecyclerAdapter;
+    private GridLayoutManager mCoursesLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +68,17 @@ public class MainActivity extends AppCompatActivity
     private void initializeDisplayContent() {
         mRecyclerItems = findViewById(R.id.list_items);
         mNotesLayoutManager = new LinearLayoutManager(this);
+        mCoursesLayoutManager = new GridLayoutManager(this, 2);
 
         //grab the notes
         List<NoteInfo> notes = DataManager.getInstance().getNotes();
         //new up our noteRecyclerAdapter, which takes context and list of notes
         mNoteRecyclerAdapter = new NoteRecyclerAdapter(this, notes);
         //associate recycler with adapter
+
+        List<CourseInfo> courses = DataManager.getInstance().getCourses();
+        mCourseRecyclerAdapter = new CourseRecyclerAdapter(this, courses);
+
         displayNotes();
     }
 
@@ -78,10 +86,20 @@ public class MainActivity extends AppCompatActivity
         mRecyclerItems.setLayoutManager(mNotesLayoutManager);
         mRecyclerItems.setAdapter(mNoteRecyclerAdapter);
 
+        selectNavigationMenuItem(R.id.nav_notes);
+    }
+
+    private void displayCourses() {
+        mRecyclerItems.setLayoutManager(mCoursesLayoutManager);
+        mRecyclerItems.setAdapter(mCourseRecyclerAdapter);
+
+        selectNavigationMenuItem(R.id.nav_courses);
+    }
+
+    private void selectNavigationMenuItem(int id) {
         NavigationView navigationView = findViewById(R.id.nav_view);
         Menu menu = navigationView.getMenu();
-        menu.findItem(R.id.nav_notes).setChecked(true);
-
+        menu.findItem(id).setChecked(true);
     }
 
     @Override
@@ -126,7 +144,7 @@ public class MainActivity extends AppCompatActivity
             displayNotes();
             // Handle the camera action
         } else if (id == R.id.nav_courses) {
-            handleSelection("Courses");
+            displayCourses();
         } else if (id == R.id.nav_share) {
             handleSelection("You've shared enough");
         } else if (id == R.id.nav_send) {

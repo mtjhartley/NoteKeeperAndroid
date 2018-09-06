@@ -19,17 +19,17 @@ import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
     public final String TAG = getClass().getSimpleName();
-    public static final String NOTE_POSITION = "com.mtjhartley.notekeeper.NOTE_POSITION";
+    public static final String NOTE_ID = "com.mtjhartley.notekeeper.NOTE_ID";
     public static final String ORIGINAL_NOTE_COURSE_ID = "com.mtjhartley.notekeeper.ORIGINAL_NOTE_COURSE_ID";
     public static final String ORIGINAL_NOTE_TITLE = "com.mtjhartley.notekeeper.ORIGINAL_NOTE_TITLE";
     public static final String ORIGINAL_NOTE_TEXT = "com.mtjhartley.notekeeper.ORIGINAL_NOTE_TEXT";
-    public static final int POSITION_NOT_SET = -1;
-    private NoteInfo mNote;
+    public static final int ID_NOT_SET = -1;
+    private NoteInfo mNote = new NoteInfo(DataManager.getInstance().getCourses().get(0), "", "");
     private boolean mIsNewNote;
     private EditText mTextNoteTitle;
     private EditText mTextNoteText;
     private Spinner mSpinnerCourses;
-    private int mNotePosition;
+    private int mNoteId;
     private boolean mIsCancelling;
     private String mOriginalNoteCourseId;
     private String mOriginalNoteTitle;
@@ -79,6 +79,8 @@ public class NoteActivity extends AppCompatActivity {
         mTextNoteTitle = findViewById(R.id.text_note_title);
         mTextNoteText = findViewById(R.id.text_note_text);
 
+        Log.d(TAG, "right before loadNoteData");
+
         if(!mIsNewNote)
             loadNoteData();
 
@@ -89,13 +91,9 @@ public class NoteActivity extends AppCompatActivity {
     private void loadNoteData() {
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
 
-        String courseId = "android_intents";
-        String titleStart = "dynamic";
+        String selection = NoteInfoEntry._ID + " = ?";
 
-        String selection = NoteInfoEntry.COLUMN_COURSE_ID + " = ? AND "
-                + NoteInfoEntry.COLUMN_NOTE_TITLE + " LIKE ?";
-
-        String[] selectionArgs = {courseId, titleStart + "%"};
+        String[] selectionArgs = {Integer.toString(mNoteId)};
 
         String[] noteColumns = {
                 NoteInfoEntry.COLUMN_COURSE_ID,
@@ -130,12 +128,12 @@ public class NoteActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if(mIsCancelling){
-            Log.i(TAG, "cancelling note at position: " + mNotePosition);
-            //if it is a new note, get the mNotePosition (recently created is the value
+            Log.i(TAG, "cancelling note at position: " + mNoteId);
+            //if it is a new note, get the mNoteId (recently created is the value
             //and then call remove on it
             //IF it is a new note
             if (mIsNewNote) {
-                DataManager.getInstance().removeNote(mNotePosition);
+                DataManager.getInstance().removeNote(mNoteId);
             } else {
                 storePreviousNoteValues();
             }
@@ -185,22 +183,22 @@ public class NoteActivity extends AppCompatActivity {
 
     private void readDisplayStateValues() {
         Intent intent = getIntent();
-        mNotePosition = intent.getIntExtra(NoteActivity.NOTE_POSITION, POSITION_NOT_SET);
-        mIsNewNote = mNotePosition == POSITION_NOT_SET;
+        mNoteId = intent.getIntExtra(NOTE_ID, ID_NOT_SET);
+        mIsNewNote = mNoteId == ID_NOT_SET;
         if (mIsNewNote){
             createNewNote();
         }
 
-        Log.i(TAG, "mNotePosition: " + mNotePosition);
+        Log.i(TAG, "mNoteId: " + mNoteId);
 
-        mNote = DataManager.getInstance().getNotes().get(mNotePosition);
+//        mNote = DataManager.getInstance().getNotes().get(mNoteId);
 
     }
 
     private void createNewNote() {
         DataManager dm = DataManager.getInstance();
-        mNotePosition = dm.createNewNote(); //click the lightbulb to see the return type of this method
-        //mNote = dm.getNotes().get(mNotePosition); //grab the newly created note
+        mNoteId = dm.createNewNote(); //click the lightbulb to see the return type of this method
+        //mNote = dm.getNotes().get(mNoteId); //grab the newly created note
     }
 
     @Override
@@ -236,15 +234,15 @@ public class NoteActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.action_next);
         int lastNoteIndex = DataManager.getInstance().getNotes().size() - 1;
-        item.setEnabled(mNotePosition < lastNoteIndex);
+        item.setEnabled(mNoteId < lastNoteIndex);
         return super.onPrepareOptionsMenu(menu);
     }
 
     private void moveNext() {
         saveNote();
         //get current note position, update with next note position!
-        ++mNotePosition;
-        mNote = DataManager.getInstance().getNotes().get(mNotePosition);
+        ++mNoteId;
+        mNote = DataManager.getInstance().getNotes().get(mNoteId);
 
         saveOriginalNoteValues();
         displayNote();

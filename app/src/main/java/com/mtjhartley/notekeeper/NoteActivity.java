@@ -3,6 +3,7 @@ package com.mtjhartley.notekeeper;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,8 +12,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 
+import com.mtjhartley.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.mtjhartley.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 
 import java.util.List;
@@ -39,6 +42,7 @@ public class NoteActivity extends AppCompatActivity {
     private int mCourseIdPos;
     private int mNoteTitlePos;
     private int mNoteTextPos;
+    private SimpleCursorAdapter mAdapterCourses;
 
     @Override
     protected void onDestroy() {
@@ -58,15 +62,23 @@ public class NoteActivity extends AppCompatActivity {
 
         mSpinnerCourses = findViewById(R.id.spinner_courses);
 
-        List<CourseInfo> courses = DataManager.getInstance().getCourses();
+//        List<CourseInfo> courses = DataManager.getInstance().getCourses();
         //this Adapter ties together the data and the layout of the spinner
         //this is for formatting the selected course
-        ArrayAdapter<CourseInfo> adapterCourses =
-                new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, courses);
+//        ArrayAdapter<CourseInfo> adapterCourses =
+//                new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, courses);
+
+        //Load the spinner from the database
+        mAdapterCourses = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, null,
+                new String[] {CourseInfoEntry.COLUMN_COURSE_TITLE},
+                new int[] {android.R.id.text1},
+                0);
         //this is for the dropdownview resource
-        adapterCourses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mAdapterCourses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //associate the adapter with our spinner
-        mSpinnerCourses.setAdapter(adapterCourses);
+        mSpinnerCourses.setAdapter(mAdapterCourses);
+
+        loadCourseData();
 
         readDisplayStateValues();
         //if we're being newly created, save the note values, else, restore the older values
@@ -86,6 +98,19 @@ public class NoteActivity extends AppCompatActivity {
 
         Log.d(TAG, "onCreate");
 
+    }
+
+    private void loadCourseData() {
+        SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+        String[] courseColumns = {
+                CourseInfoEntry.COLUMN_COURSE_TITLE,
+                CourseInfoEntry.COLUMN_COURSE_ID,
+                CourseInfoEntry._ID
+        };
+
+        Cursor cursor = db.query(CourseInfoEntry.TABLE_NAME, courseColumns,
+                null, null, null, null, CourseInfoEntry.COLUMN_COURSE_TITLE);
+        mAdapterCourses.changeCursor(cursor);
     }
 
     private void loadNoteData() {
